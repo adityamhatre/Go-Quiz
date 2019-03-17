@@ -21,13 +21,13 @@ var wg sync.WaitGroup
 
 func main() {
 	reader := bufio.NewReader(os.Stdin)
-
+	ch := make(chan int, 1)
 	fmt.Println("Press return to start the quiz !")
 	_, _ = reader.ReadString('\n')
 
 	fmt.Println("Starting timer for 15 secs...")
 	wg.Add(1)
-	go startTimer()
+	go startTimer(ch)
 
 	file, err := os.Open("quiz.csv")
 	if err != nil {
@@ -77,10 +77,12 @@ func main() {
 	fmt.Printf("\nYour score is %d/13\n", score)
 }
 
-func startTimer() {
+func startTimer(ch chan int) {
 	defer wg.Done()
 	for i := 0; i < 15; i++ {
 		time.Sleep(time.Second * 1)
+		ch <- i
 	}
+	close(ch)
 	fmt.Println("\n\nTime's up sucker !!!")
 }
